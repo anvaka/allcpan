@@ -7,7 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "cpan"
+    "cpan",
+    "indexer",
+    "crawler",
+    "graph"
   ],
   "author": "Andrei Kashcha",
   "license": "MIT",
