@@ -17,5 +17,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/anvaka/allcpan"
+  },
+  "dependencies": {
+    "request-promise": "^0.4.2"
   }
 }
