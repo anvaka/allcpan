@@ -1,10 +1,7 @@
 var fs = require('fs');
 var path = require('path');
-var getGraph = require('./lib/convertToGraph.js');
+var graph = require('./lib/loadGraph.js')();
 
-var index = getJSON(process.argv[2] || './cpan_dist.json');
-var revDeps = getJSON(process.argv[3] || './cpan_reverse_deps.json');
-var graph = getGraph(index, revDeps);
 var layout = require('ngraph.forcelayout3d')(graph);
 
 console.log('Loaded graph');
@@ -36,8 +33,4 @@ function saveIteration(name) {
   });
 
   fs.writeFileSync(fname, buf);
-}
-
-function getJSON(name) {
-  return JSON.parse(fs.readFileSync(name, 'utf8'));
 }
