@@ -2,7 +2,8 @@ var fs = require('fs');
 var Crawler = require('crawler');
 
 var pageSize = 5000;
-var chunkSize = 3000;
+var chunkSize = 30;
+var total = 0;
 
 var outFile = 'cpan_reverse_deps.json';
 var inFile = process.argv[2] || './cpan_dist.json';
@@ -26,16 +27,24 @@ function queueChunk() {
     console.log('Queueing last ' + index.length + ' packages');
     c.queue(index.splice(0, index.length));
   } else {
-    console.log('Queueing next ' + chunkSize + ' packages');
+    console.log('Queueing next ' + chunkSize + ' packages.');
     c.queue(index.splice(0, chunkSize));
+    console.log('Remaining: ' + index.length);
   }
 }
 
 function indexPackage(err, res) {
+  total += 1;
+
   if (err) {
     console.log('ERROR: ' + err);
     return;
   }
+
+  if (total % chunkSize === 0) {
+    queueChunk();
+  }
+
   var body = JSON.parse(res.body);
   var distName = getName(res);
   if (body.code === 404) {
@@ -47,10 +56,10 @@ function indexPackage(err, res) {
     console.log(res.url);
     console.log('No hits. Response: ' + res.body);
   }
-  var total = body.hits.total;
+  var searchTotal = body.hits.total;
   var names = body.hits.hits.map(toName);
   var store = saveHits(distName, names);
-  if (store.length < total) {
+  if (store.length < searchTotal) {
     // we need to index more for this package:
     console.log('Need more requests for ' + distName);
     c.queue([
@@ -82,8 +91,7 @@ function toName(x) {
 }
 
 function saveAndExit() {
-  var totalFound = Object.keys(results).length;
-  console.log('Indexed ' + totalFound + ' distributions');
+  console.log('Indexed ' + total + ' distributions');
   fs.writeFileSync(outFile, JSON.stringify(results), 'utf8');
   process.exit(0);
 }
